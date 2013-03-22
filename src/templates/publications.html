@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Authors{% endblock %}
+{% block head %}
+  {{ super() }}
+{% endblock %}
+{% block content %}
+
+
+{# a function that takes a Publication and displays its authors in the li #}
+{% macro showAuthors(CurrentAuthors) -%}
+	<ul>
+		{% for author in CurrentAuthors %}
+			<li>{{ author }}</li>
+		{% endfor %}
+        <ul>
+{%- endmacro %}
+
+<form action="/publications/search" method="get">	
+<table style="width:600px;margin: 0 auto;">
+	<tr>
+		<td style="vertical-align: text-top;"><h2>Publication Type:</h2></td>
+		<td>
+			<fieldset data-role="controlgroup">
+				<label><input type="checkbox" name="conference_paper" />Conference Papers</label>
+				<label><input type="checkbox" name="book" />Book</label>
+				<label><input type="checkbox" name="book_chapter" />Book Chapters</label>
+				<label><input type="checkbox" name="journal" />Journals</label>
+			</fieldset>
+		</td>
+	</tr>
+	<tr>
+	    <td><h2>From:</h2></td>
+	    <td>
+		<div data-role="fieldcontain" style="max-width:200px">
+			<select name="from" id="select-choice-1">
+				{% for i in range(1960,2020)%}
+					<option value="{{i}}">{{i}}</option>
+				{%endfor%}
+			</select>
+		</div>
+	    </td>
+	</tr>
+	<tr>
+	    <td><h2>To:</h2></td>
+	    <td>
+		<div data-role="fieldcontain" style="max-width:200px">
+			<select name="to" id="select-choice-1">
+				{% for i in range(1960,2020)%}
+					<option value="{{i}}">{{i}}</option>
+				{%endfor%}
+			</select>
+		</div>
+	    </td>
+
+	</tr>
+	<tr>
+		<td colspan="2">
+			<input type="submit" value="Search" />
+		</td>	
+	</tr>
+</table>
+</form>
+
+<div data-role="collapsible-set" data-theme="c" data-content-theme="d">
+    {% for publication in publications %}
+	<div data-role="collapsible">
+        	<h3>Title:{{publications[publication].title}}</h3>
+        	<h3>Year:{{publications[publication].year}}</h3>
+        	<h3>Publication Type:{{publications[publication].pub_type.replace("_"," ").title()}}</h3>
+		<h3>Authors:</h3>
+        	{{showAuthors(publications[publication].authors)}}
+	
+	</div>
+    {% endfor %}
+</div>
+{% endblock %}
