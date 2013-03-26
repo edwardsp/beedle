@@ -12,7 +12,10 @@ class Publication:
 	def __init__(self, pub_type, title, year, authors):
 		self.pub_type = pub_type
 		self.title = title
-		self.year = int(year)
+		if year:
+			self.year = int(year)
+		else:
+			self.year = -1
 		self.authors = authors
 
 class Author:
@@ -24,7 +27,6 @@ class Database:
 		self.publications = []
 		self.authors = []
 		self.author_idx = {}
-		self.publications_by_author = {}
 
 		handler = DocumentHandler(self)
 		parser = make_parser()
@@ -32,7 +34,6 @@ class Database:
 		infile = open(filename)
 		parser.parse(infile)
 		infile.close()
-
 
 	def get_publication_summary(self):
 		header = ( "Details", "Conference Paper", 
@@ -104,10 +105,14 @@ class Database:
 			try:
 				idlist.append(self.author_idx[a])
 			except KeyError:
-				idlist.append(len(self.authors))
+				a_id = len(self.authors)
+				self.author_idx[a] = a_id
+				idlist.append(a_id)
 				self.authors.append(Author(a))
 		self.publications.append(
 			Publication(pub_type, title, year, idlist))
+		if (len(self.publications) % 100000) == 0:
+			print "Adding publication number %d (number of authors is %d)" % (len(self.publications), len(self.authors))
 
 class DocumentHandler(handler.ContentHandler):
 	PUB_TYPE = {
@@ -148,6 +153,8 @@ class DocumentHandler(handler.ContentHandler):
 			self.clearData()
 
 	def characters(self, chrs):
+		if self.pub_type == None:
+			return
 		d = chrs.strip()
 		if d == "":
 			pass
