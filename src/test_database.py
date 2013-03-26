@@ -7,7 +7,9 @@ class TestDatabase(unittest.TestCase):
 		self.assertTrue(False)
 
 	def test_read(self):
-		self.assertTrue(False)
+		db = Database()
+		db.read("../data/publications_small_sample.xml")
+		self.assertEqual(len(db.publications), 7)
 
 	def test_get_publication_summary(self):
 		self.assertTrue(False)
