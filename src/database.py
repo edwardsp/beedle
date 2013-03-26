@@ -12,7 +12,7 @@ class Publication:
 	def __init__(self, pub_type, title, year, authors):
 		self.pub_type = pub_type
 		self.title = title
-		self.year = year
+		self.year = int(year)
 		self.authors = authors
 
 class Author:
@@ -55,12 +55,12 @@ class Database:
 			"Number of journals", "Number of books",
 			"Number of book chapers", "Total" )
 
-		astats = [[0,0,0,0]] * len(self.authors)
+		astats = [ [0,0,0,0] for i in range(len(self.authors)) ]
 		for p in self.publications:
 			for a in p.authors:
 				astats[a][p.pub_type] += 1
 
-		data = [ [self.authors[i].name] + astats[i]
+		data = [ [self.authors[i].name] + astats[i] + [sum(astats[i])] 
 			for i in range(len(astats)) ]
 		return (header, data)
 
@@ -68,13 +68,35 @@ class Database:
 		header = ( "Year", "Number of conference papers",
 			"Number of journals", "Number of books",
 			"Number of book chapers" )
-		pass
+
+		ystats = {}
+		for p in self.publications:
+			try:
+				ystats[p.year][p.pub_type] += 1
+			except KeyError:
+				ystats[p.year] = [0,0,0,0]
+				ystats[p.year][p.pub_type] += 1
+
+		data = [ [y]+ystats[y] for y in ystats ]
+		return (header, data)	
 
 	def get_author_totals_by_year(self):
-		header = ( "Author", "Number of conference papers",
+		header = ( "Year", "Number of conference papers",
 			"Number of journals", "Number of books",
-			"Number of book chapers", "Total" )
-		pass
+			"Number of book chapers" )
+
+		ystats = {}
+		for p in self.publications:
+			try:
+				s = ystats[p.year][p.pub_type]
+			except KeyError:
+				ystats[p.year] = [set(), set(), set(), set()]
+				s = ystats[p.year][p.pub_type]
+			for a in p.authors:
+				s.add(a)
+		data = [ [y]+[len(s) for s in ystats[y]]
+			for y in ystats ]
+		return (header, data)	
 
 	def add_publication(self, pub_type, title, year, authors):
 		idlist = []
