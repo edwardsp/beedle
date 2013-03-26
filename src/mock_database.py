@@ -14,7 +14,7 @@ class MockDatabase:
                 return (('Author', 'Number of conference papers', 'Number of journals', 'Number of books', 'Number of book chapters', 'Total'), [ ('Author1', 1, 2, 3, 4, 10), ('Author2', 5, 6, 7, 8, 26) ])
 	# Return tuple containing headers and list of data
         def get_publications_by_year(self):
-                return (('Author', 'Number of conference papers', 'Number of journals', 'Number of books', 'Number of book chapters'), [ (2002, 100, 50, 25, 10), (2004, 99, 49, 24, 9) ])
+                return (('Year', 'Number of conference papers', 'Number of journals', 'Number of books', 'Number of book chapters'), [ (2002, 100, 50, 25, 10), (2004, 99, 49, 24, 9) ])
 
 	# Return tuple containing headers and list of data
         def get_author_totals_by_year(self):
