@@ -1,13 +1,10 @@
-
 class MockDatabase:
         def read(self, filename):
                 pass
 
         def get_publication_summary(self):
-                return [
-	{ 'Number of publications' : { 'Conference Paper':10, 'Journal':5, 'Book':8, 'Book Chapter':2 } },
-	{ 'Number of authors' : { 'Conference Paper':10, 'Journal':5, 'Book':8, 'Book Chapter':2 } }
-]
+                return (('Details','Conference Paper','Journal','Book','Book Chapter'),
+			[('Number of publications',10,5,8,2), ('Number of authors',10,5,8,2)])
 
 	# Return tuple containing headers and list of data
         def get_publications_by_author(self):
@@ -20,3 +17,6 @@ class MockDatabase:
         def get_author_totals_by_year(self):
                 return (('Author', 'Number of conference papers', 'Number of journals', 'Number of books', 'Number of book chapters'), [ (2001, 10, 5, 6, 3), (2003, 12, 7, 4, 2) ])
 
+#returns an instance of the of the class MockDatabase
+def getdb():
+	return MockDatabase()
