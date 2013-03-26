@@ -21,20 +21,59 @@ class Author:
 
 class Database:
 	def read(self, filename):
-		publications = []
-		authors = []
-		author_idx = {}
+		self.publications = []
+		self.authors = []
+		self.author_idx = {}
+		self.publications_by_author = {}
+
+		handler = DocumentHandler(self)
+		parser = make_parser()
+		parser.setContentHandler(handler)
+		infile = open(filename)
+		parser.parse(infile)
+		infile.close()
+
 
 	def get_publication_summary(self):
-		pass
+		header = ( "Details", "Conference Paper", 
+			"Journal", "Book", "Book Chapter" )
+
+		plist = [0,0,0,0]
+		alist = [set(),set(),set(),set()]
+
+		for p in self.publications:
+			plist[p.pub_type] += 1
+			for a in p.authors:
+				alist[p.pub_type].add(a)
+		data = [
+			["Number of publications"] + plist,
+			["Number of authors"] + [ len(a) for a in alist ] ]
+		return (header, data)
 
 	def get_publications_by_author(self):
-		pass
+		header = ( "Author", "Number of conference papers",
+			"Number of journals", "Number of books",
+			"Number of book chapers", "Total" )
+
+		astats = [[0,0,0,0]] * len(self.authors)
+		for p in self.publications:
+			for a in p.authors:
+				astats[a][p.pub_type] += 1
+
+		data = [ [self.authors[i].name] + astats[i]
+			for i in range(len(astats)) ]
+		return (header, data)
 
 	def get_publications_by_year(self):
+		header = ( "Year", "Number of conference papers",
+			"Number of journals", "Number of books",
+			"Number of book chapers" )
 		pass
 
 	def get_author_totals_by_year(self):
+		header = ( "Author", "Number of conference papers",
+			"Number of journals", "Number of books",
+			"Number of book chapers", "Total" )
 		pass
 
 	def add_publication(self, pub_type, title, year, authors):
@@ -42,9 +81,9 @@ class Database:
 		for a in authors:
 			try:
 				idlist.append(self.author_idx[a])
-			catch KeyError:
-				idlist.append(len(authors))
-				authors.append(Author(a))
+			except KeyError:
+				idlist.append(len(self.authors))
+				self.authors.append(Author(a))
 		self.publications.append(
 			Publication(pub_type, title, year, idlist))
 
@@ -79,7 +118,7 @@ class DocumentHandler(handler.ContentHandler):
 			
 	def endElement(self, name):
 		if name in DocumentHandler.PUB_TYPE.keys():
-			self.dblp.add_publication(
+			self.db.add_publication(
 				self.pub_type,
 				self.title,
 				self.year,
@@ -87,11 +126,14 @@ class DocumentHandler(handler.ContentHandler):
 			self.clearData()
 
 	def characters(self, chrs):
-		if tag == "author":
-			self.authors.append(chrs.strip())
-		elif tag == "title":
-			self.title = chrs.strip()
-		elif tag == "year":
-			self.year = chrs.strip()
+		d = chrs.strip()
+		if d == "":
+			pass
+		elif self.tag == "author":
+			self.authors.append(d)
+		elif self.tag == "title":
+			self.title = d
+		elif self.tag == "year":
+			self.year = d
 
 
