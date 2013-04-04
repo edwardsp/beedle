@@ -3,8 +3,8 @@ class MockDatabase:
                 pass
 
         def get_publication_summary(self):
-                return (('Details','Conference Paper','Journal','Book','Book Chapter'),
-			[('Number of publications',10,5,8,2), ('Number of authors',10,5,8,2)])
+                return (('Details','Conference Paper','Journal','Book','Book Chapter', 'Total'),
+			[('Number of publications',10,5,8,2,25), ('Number of authors',10,5,8,2,25)])
 
 	# Return tuple containing headers and list of data
         def get_publications_by_author(self):

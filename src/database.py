@@ -37,7 +37,7 @@ class Database:
 
 	def get_publication_summary(self):
 		header = ( "Details", "Conference Paper", 
-			"Journal", "Book", "Book Chapter" )
+			"Journal", "Book", "Book Chapter", "Total" )
 
 		plist = [0,0,0,0]
 		alist = [set(),set(),set(),set()]
@@ -46,9 +46,12 @@ class Database:
 			plist[p.pub_type] += 1
 			for a in p.authors:
 				alist[p.pub_type].add(a)
+		# create union of all authors
+		ua = alist[0] | alist[1] | alist[2] | alist[3]
+
 		data = [
-			["Number of publications"] + plist,
-			["Number of authors"] + [ len(a) for a in alist ] ]
+			["Number of publications"] + plist + [sum(plist)],
+			["Number of authors"] + [ len(a) for a in alist ] + [len(ua)] ]
 		return (header, data)
 
 	def get_publications_by_author(self):
