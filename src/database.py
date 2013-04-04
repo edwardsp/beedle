@@ -126,6 +126,7 @@ class DocumentHandler(handler.ContentHandler):
 
 	def __init__(self, db):
 		self.tag = None
+		self.chrs = ""
 		self.clearData()
 		self.db = db
 
@@ -145,27 +146,29 @@ class DocumentHandler(handler.ContentHandler):
 		if name in DocumentHandler.PUB_TYPE.keys():
 			self.pub_type = DocumentHandler.PUB_TYPE[name]
 		self.tag = name
+		self.chrs = ""
 			
 	def endElement(self, name):
-		if name in DocumentHandler.PUB_TYPE.keys():
+		if self.pub_type == None:
+			return
+		d = self.chrs.strip()
+		if self.tag == "author":
+			self.authors.append(d)
+		elif self.tag == "title":
+			self.title = d
+		elif self.tag == "year":
+			self.year = d
+		elif name in DocumentHandler.PUB_TYPE.keys():
 			self.db.add_publication(
 				self.pub_type,
 				self.title,
 				self.year,
 				self.authors)
 			self.clearData()
+		self.tag = None
+		self.chrs = ""
 
 	def characters(self, chrs):
-		if self.pub_type == None:
-			return
-		d = chrs.strip()
-		if d == "":
-			pass
-		elif self.tag == "author":
-			self.authors.append(d)
-		elif self.tag == "title":
-			self.title = d
-		elif self.tag == "year":
-			self.year = d
-
+		if self.pub_type != None:
+			self.chrs += chrs
 
