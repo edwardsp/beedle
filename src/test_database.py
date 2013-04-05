@@ -17,7 +17,7 @@ class TestDatabase(unittest.TestCase):
 		header, data = db.get_publication_summary()
 		self.assertEqual(len(header), len(data[0]),
 			"header and data column size doesn't match")
-		self.assertEqual(len(data[0]), 5, 
+		self.assertEqual(len(data[0]), 6, 
 			"incorrect number of columns in data")
 		self.assertEqual(len(data), 2, 
 			"incorrect number of rows in data")
