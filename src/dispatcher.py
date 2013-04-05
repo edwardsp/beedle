@@ -39,5 +39,6 @@ if __name__ == "__main__":
 	else:
 		print "Database:", sys.argv[1]
 		db = database.Database()
-		db.read(sys.argv[1])
+		if db.read(sys.argv[1]) == False:
+			sys.exit(1)
 	app.run(debug=True)

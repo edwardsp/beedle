@@ -1,4 +1,4 @@
-from xml.sax import handler, make_parser
+from xml.sax import handler, make_parser, SAXException
 
 PublicationType = [
 	"Conference Paper", "Journal", "Book", "Book Chapter"]
@@ -32,8 +32,14 @@ class Database:
 		parser = make_parser()
 		parser.setContentHandler(handler)
 		infile = open(filename)
-		parser.parse(infile)
+		valid = True
+		try:
+			parser.parse(infile)
+		except SAXException as e:
+			valid = False
+			print "Error reading file ("+e.getMessage()+")"
 		infile.close()
+		return valid
 
 	def get_publication_summary(self):
 		header = ( "Details", "Conference Paper", 

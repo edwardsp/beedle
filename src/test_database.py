@@ -8,12 +8,16 @@ class TestDatabase(unittest.TestCase):
 
 	def test_read(self):
 		db = database.Database()
-		db.read("../data/simple.xml")
+		self.assertTrue(db.read("../data/simple.xml"))
 		self.assertEqual(len(db.publications), 1)
+
+	def test_read_invalid_xml(self):
+		db = database.Database()
+		self.assertFalse(db.read("../data/invalid_xml_file.xml"))
 
 	def test_get_publication_summary(self):
 		db = database.Database()
-		db.read("../data/simple.xml")
+		self.assertTrue(db.read("../data/simple.xml"))
 		header, data = db.get_publication_summary()
 		self.assertEqual(len(header), len(data[0]),
 			"header and data column size doesn't match")
@@ -28,7 +32,7 @@ class TestDatabase(unittest.TestCase):
 
 	def test_get_publications_by_author(self):
 		db = database.Database()
-		db.read("../data/simple.xml")
+		self.assertTrue(db.read("../data/simple.xml"))
 		header, data = db.get_publications_by_author()
 		self.assertEqual(len(header), len(data[0]),
 			"header and data column size doesn't match")
@@ -39,7 +43,7 @@ class TestDatabase(unittest.TestCase):
 
 	def test_get_publications_by_year(self):
 		db = database.Database()
-		db.read("../data/simple.xml")
+		self.assertTrue(db.read("../data/simple.xml"))
 		header, data = db.get_publications_by_year()
 		self.assertEqual(len(header), len(data[0]),
 			"header and data column size doesn't match")
@@ -50,7 +54,7 @@ class TestDatabase(unittest.TestCase):
 
 	def test_get_author_totals_by_year(self):
 		db = database.Database()
-		db.read("../data/simple.xml")
+		self.assertTrue(db.read("../data/simple.xml"))
 		header, data = db.get_author_totals_by_year()
 		self.assertEqual(len(header), len(data[0]),
 			"header and data column size doesn't match")
