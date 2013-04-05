@@ -15,6 +15,16 @@ class TestDatabase(unittest.TestCase):
 		db = database.Database()
 		self.assertFalse(db.read("../data/invalid_xml_file.xml"))
 
+	def test_read_missing_year(self):
+		db = database.Database()
+		self.assertTrue(db.read("../data/missing_year.xml"))
+		self.assertEqual(len(db.publications), 0)
+
+	def test_read_missing_title(self):
+		db = database.Database()
+		self.assertTrue(db.read("../data/missing_title.xml"))
+		self.assertEqual(len(db.publications), 0)
+
 	def test_get_publication_summary(self):
 		db = database.Database()
 		self.assertTrue(db.read("../data/simple.xml"))

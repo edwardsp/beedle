@@ -109,6 +109,13 @@ class Database:
 		return (header, data)	
 
 	def add_publication(self, pub_type, title, year, authors):
+		if title == None or year == None or len(authors) == 0:
+			print "Warning: excluding publication due to missing information"
+			print "    Publication type:", PublicationType[pub_type]
+			print "    Title:", title
+			print "    Year:", year
+			print "    Authors:", ",".join(authors)
+			return
 		idlist = []
 		for a in authors:
 			try:
