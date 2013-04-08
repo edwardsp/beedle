@@ -17,6 +17,3 @@ class MockDatabase:
         def get_author_totals_by_year(self):
                 return (('Year', 'Number of conference papers', 'Number of journals', 'Number of books', 'Number of book chapters'), [ (2001, 10, 5, 6, 3), (2003, 12, 7, 4, 2) ])
 
-#returns an instance of the of the class MockDatabase
-def getdb():
-	return MockDatabase()
