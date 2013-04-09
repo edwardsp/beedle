@@ -53,4 +53,5 @@ if __name__ == "__main__":
 		db = database.Database()
 		if db.read(sys.argv[1]) == False:
 			sys.exit(1)
-	app.run(debug=True)
+	#app.run(debug=True)
+	app.run(debug=False)
