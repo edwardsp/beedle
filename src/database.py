@@ -31,7 +31,7 @@ class Database:
 		handler = DocumentHandler(self)
 		parser = make_parser()
 		parser.setContentHandler(handler)
-		infile = open(filename)
+		infile = open(filename, "r")
 		valid = True
 		try:
 			parser.parse(infile)
@@ -77,7 +77,7 @@ class Database:
 	def get_publications_by_year(self):
 		header = ( "Year", "Number of conference papers",
 			"Number of journals", "Number of books",
-			"Number of book chapers" )
+			"Number of book chapers", "Total" )
 
 		ystats = {}
 		for p in self.publications:
@@ -87,13 +87,13 @@ class Database:
 				ystats[p.year] = [0,0,0,0]
 				ystats[p.year][p.pub_type] += 1
 
-		data = [ [y]+ystats[y] for y in ystats ]
+		data = [ [y]+ystats[y]+[sum(ystats[y])] for y in ystats ]
 		return (header, data)	
 
 	def get_author_totals_by_year(self):
 		header = ( "Year", "Number of conference papers",
 			"Number of journals", "Number of books",
-			"Number of book chapers" )
+			"Number of book chapers", "Total" )
 
 		ystats = {}
 		for p in self.publications:
@@ -104,7 +104,7 @@ class Database:
 				s = ystats[p.year][p.pub_type]
 			for a in p.authors:
 				s.add(a)
-		data = [ [y]+[len(s) for s in ystats[y]]
+		data = [ [y]+[len(s) for s in ystats[y]]+[len(ystats[y][0] | ystats[y][1] | ystats[y][2] | ystats[y][3])]
 			for y in ystats ]
 		return (header, data)	
 
