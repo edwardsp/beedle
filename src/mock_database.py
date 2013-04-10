@@ -17,3 +17,11 @@ class MockDatabase:
         def get_author_totals_by_year(self):
                 return (('Year', 'Number of conference papers', 'Number of journals', 'Number of books', 'Number of book chapters'), [ (2001, 10, 5, 6, 3), (2003, 12, 7, 4, 2) ])
 
+	# Return a list in the format:
+	# [ [author, total], ... ]
+	# where author is the author name
+	# and total is the number of publications
+	# the publications used will only include items where
+	# the give name was an author
+	def get_coauthor_details(self, name):
+		return [ ('foo', 1), ('bar', 2), ('baz', 3) ]

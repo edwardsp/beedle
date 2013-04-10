@@ -1,6 +1,7 @@
 from flask import Flask
 from flask import render_template
 from flask import send_from_directory
+from flask import request
 import mock_database
 import database
 import os
@@ -9,15 +10,36 @@ app = Flask(__name__)
 
 db = None
 
-@app.route('/favicon.ico')
+@app.route("/favicon.ico")
 def favicon():
 	return send_from_directory(
-		os.path.join(app.root_path, 'static'),
-		'favicon.ico', mimetype='image/vnd.microsoft.icon')
+		os.path.join(app.root_path, "static"),
+		"favicon.ico", mimetype="image/vnd.microsoft.icon")
 
 @app.route("/")
 def mainpage():
 	return showStatisticsMenu()
+
+@app.route("/visualisation/wordcloud")
+def wordcloud():
+	args = {}
+	args["name"] = request.args.get("name")
+	args["width"] = int(request.args.get("width"))
+	args["height"] = int(request.args.get("height"))
+	args["data"] = db.get_coauthor_details(args["name"])
+	return render_template("word_cloud.html", args=args)
+
+@app.route("/visualisation/forcelayout")
+def forcelayout():
+	args = {}
+	args["name"] = request.args.get("name")
+	level = int(request.args.get("level"))
+	args["width"] = int(request.args.get("width"))
+	args["height"] = int(request.args.get("height"))
+	data = db.get_forcelayout_data(args["name"], level)
+	args["nodes"] = data[0]
+	args["links"] = data[1]
+	return render_template("force_layout.html", args=args)
 
 @app.route("/statistics")
 def showStatisticsMenu():
@@ -42,7 +64,7 @@ def showPublicationSummary(status):
 		args["title"] = "Author by Year"
 		args["data"] = db.get_author_totals_by_year()
 
-	return render_template('statistics_details.html',args = args)
+	return render_template('statistics_details.html',args=args)
 
 if __name__ == "__main__":
 	if len(sys.argv) < 2:
@@ -53,5 +75,5 @@ if __name__ == "__main__":
 		db = database.Database()
 		if db.read(sys.argv[1]) == False:
 			sys.exit(1)
-	#app.run(debug=True)
+	app.run(debug=True)
 	app.run(debug=False)

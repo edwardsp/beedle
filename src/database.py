@@ -130,6 +130,52 @@ class Database:
 		if (len(self.publications) % 100000) == 0:
 			print "Adding publication number %d (number of authors is %d)" % (len(self.publications), len(self.authors))
 
+	def _get_collaborations(self, author_id, include_self):
+		data = {}
+		for p in self.publications:
+			if author_id in p.authors:
+				for a in p.authors:
+					try:
+						data[a] += 1
+					except KeyError:
+						data[a] = 1
+		if not include_self:
+			del data[author_id]
+		return data
+
+	def get_coauthor_details(self, name):
+		author_id = self.author_idx[name]
+		data = self._get_collaborations(author_id, True)
+		return [ (self.authors[key].name, data[key])
+			for key in data ]
+
+	def get_forcelayout_data(self, name, level):
+		author_id = self.author_idx[name]
+		authors = [(author_id, 1)]
+		links = {}
+		author_map = {author_id:0}
+		start = 0
+		for lvl in range(2,level+2):
+			end = len(authors)
+			for a in range(start, end):
+				collab = self._get_collaborations(authors[a][0], False)
+				aid = a
+				for a2 in collab:
+					try:
+						a2id = author_map[a2]
+					except KeyError:
+						a2id = len(authors)
+						authors.append((a2, lvl))
+						author_map[a2] = a2id
+					if aid < a2id:
+						links[(aid,a2id)] = collab[a2]
+					#else:
+					#	links[(a2id,aid)] = collab[a2]
+			start = end
+		return ( [ (self.authors[a[0]].name, a[1]) for a in authors ],
+			[ (k[0], k[1], links[k]) for k in links ] )
+
+
 class DocumentHandler(handler.ContentHandler):
 	PUB_TYPE = {
 		"inproceedings":Publication.CONFERENCE_PAPER,
