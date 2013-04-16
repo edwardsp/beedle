@@ -23,7 +23,8 @@ class TestDatabase(unittest.TestCase):
 	def test_read_missing_title(self):
 		db = database.Database()
 		self.assertTrue(db.read("../data/missing_title.xml"))
-		self.assertEqual(len(db.publications), 0)
+		# publications with missing titles should be added
+		self.assertEqual(len(db.publications), 1)
 
 	def test_get_publication_summary(self):
 		db = database.Database()
