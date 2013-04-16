@@ -108,14 +108,21 @@ class Database:
 			for y in ystats ]
 		return (header, data)	
 
+	def get_crossfilter_data(self):
+		header = ( "Year", "Type", "Authors" )
+		data = [ (p.year, p.pub_type, len(p.authors)) for p in self.publications ]
+		return (header, data)
+
 	def add_publication(self, pub_type, title, year, authors):
-		if title == None or year == None or len(authors) == 0:
+		if year == None or len(authors) == 0:
 			print "Warning: excluding publication due to missing information"
 			print "    Publication type:", PublicationType[pub_type]
 			print "    Title:", title
 			print "    Year:", year
 			print "    Authors:", ",".join(authors)
 			return
+		if title == None:
+			print "Warning: adding publication with missing title [ %s %s (%s) ]" % (PublicationType[pub_type], year, ",".join(authors))
 		idlist = []
 		for a in authors:
 			try:
@@ -177,6 +184,7 @@ class Database:
 
 
 class DocumentHandler(handler.ContentHandler):
+	TITLE_TAGS = [ "sub", "sup", "i", "tt", "ref" ]
 	PUB_TYPE = {
 		"inproceedings":Publication.CONFERENCE_PAPER,
 		"article":Publication.JOURNAL,
@@ -202,6 +210,8 @@ class DocumentHandler(handler.ContentHandler):
 		pass
 
 	def startElement(self, name, attrs):
+		if name in self.TITLE_TAGS:
+			return
 		if name in DocumentHandler.PUB_TYPE.keys():
 			self.pub_type = DocumentHandler.PUB_TYPE[name]
 		self.tag = name
@@ -209,6 +219,8 @@ class DocumentHandler(handler.ContentHandler):
 			
 	def endElement(self, name):
 		if self.pub_type == None:
+			return
+		if name in self.TITLE_TAGS:
 			return
 		d = self.chrs.strip()
 		if self.tag == "author":
