@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Word cloud : {{ args.name }}{% endblock %}
+{% block content %}
+<h1>Word cloud : {{ args.name }}</h1>
+<div id="wordcloud"/>
+<script>
+  var fill = d3.scale.category20();
+
+  var rstart = -60;
+  var rend = 60;
+  var rsteps = 5;
+
+  var w = {{ args.width }};
+  var h = {{ args.height }};
+
+  var collaborations = [
+{% for row in args.data %}
+    { text:'{{ row[0] }}', size:Math.sqrt({{ row[1] }})*10 },
+{% endfor %}
+  ];
+
+  d3.layout.cloud().size([w, h])
+      .timeInterval(10)
+      .words(collaborations)
+      .rotate(function() { return rstart + (~~(Math.random() * rsteps) * ((rend-rstart)/(rsteps-1))); })
+      .font("Impact")
+      .fontSize(function(d) { return d.size; })
+      .on("end", draw)
+      .start();
+
+  function draw(words) {
+    d3.select("div #wordcloud").append("svg")
+        .attr("width", w)
+        .attr("height", h)
+      .append("g")
+        .attr("transform", "translate("+(w/2)+","+(h/2)+")")
+      .selectAll("text")
+        .data(words)
+      .enter().append("text")
+        .style("font-size", function(d) { return d.size + "px"; })
+        .style("font-family", "Impact")
+        .style("fill", function(d, i) { return fill(i); })
+        .attr("text-anchor", "middle")
+        .attr("transform", function(d) {
+          return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
+        })
+        .text(function(d) { return d.text; });
+  }
+</script>
+{% endblock %}
