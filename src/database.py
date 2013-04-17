@@ -1,3 +1,6 @@
+import average
+import itertools
+import numpy as np
 from xml.sax import handler, make_parser, SAXException
 
 PublicationType = [
@@ -22,6 +25,13 @@ class Author:
 	def __init__(self, name):
 		self.name = name
 
+class Stat:
+	STR = ["Mean", "Median", "Mode"]	
+	FUNC = [average.mean, average.median, average.mode]
+	MEAN = 0
+	MEDIAN = 1
+	MODE = 2
+
 class Database:
 	def read(self, filename):
 		self.publications = []
@@ -40,6 +50,30 @@ class Database:
 			print "Error reading file ("+e.getMessage()+")"
 		infile.close()
 		return valid
+
+	def get_publication_summary_average(self, av):
+		header = ( "Details", "Conference Paper", 
+			"Journal", "Book", "Book Chapter", "All Publications" )
+
+		pub_per_auth = np.zeros((len(self.authors), 4))
+		auth_per_pub = [[],[],[],[]]
+
+		for p in self.publications:
+			auth_per_pub[p.pub_type].append(len(p.authors))
+			for a in p.authors:
+				pub_per_auth[a, p.pub_type] += 1
+
+		name = Stat.STR[av]
+		func = Stat.FUNC[av]
+
+		data = [
+			[name+" authors per publication"]
+				+ [ func(auth_per_pub[i]) for i in np.arange(4) ]
+				+ [ func(list(itertools.chain(*auth_per_pub))) ],
+			[name+" publications per author"] 
+				+ [ func(pub_per_auth[:,i]) for i in np.arange(4) ] 
+				+ [ func(pub_per_auth.sum(axis=1)) ] ]
+		return (header, data)
 
 	def get_publication_summary(self):
 		header = ( "Details", "Conference Paper", 
@@ -60,6 +94,22 @@ class Database:
 			["Number of authors"] + [ len(a) for a in alist ] + [len(ua)] ]
 		return (header, data)
 
+	# TODO: IMPLEMENT
+	def get_publications_by_author_average(self, av):
+		header = ( "Author", "Number of conference papers",
+			"Number of journals", "Number of books",
+			"Number of book chapers", "All " )
+
+		astats = [ [0,0,0,0] for i in range(len(self.authors)) ]
+		for p in self.publications:
+			for a in p.authors:
+				astats[a][p.pub_type] += 1
+
+		data = [ [self.authors[i].name] + astats[i] + [sum(astats[i])] 
+			for i in range(len(astats)) ]
+		return (header, data)
+
+
 	def get_publications_by_author(self):
 		header = ( "Author", "Number of conference papers",
 			"Number of journals", "Number of books",
@@ -73,6 +123,28 @@ class Database:
 		data = [ [self.authors[i].name] + astats[i] + [sum(astats[i])] 
 			for i in range(len(astats)) ]
 		return (header, data)
+
+	def get_average_authors_per_publication_by_year(self, av):
+		header = ( "Year", "Number of conference papers",
+			"Number of journals", "Number of books",
+			"Number of book chapers", "All publications" )
+
+		ystats = {}
+		for p in self.publications:
+			try:
+				ystats[p.year][p.pub_type].append(len(p.authors))
+			except KeyError:
+				ystats[p.year] = [[],[],[],[]]
+				ystats[p.year][p.pub_type].append(len(p.authors))
+		
+		name = Stat.STR[av]
+		func = Stat.FUNC[av]
+
+		data = [ [y]
+			+ [ func(L) for L in ystats[y] ]
+			+ [ func(list(itertools.chain(*ystats[y]))) ]
+			for y in ystats ]
+		return (header, data)	
 
 	def get_publications_by_year(self):
 		header = ( "Year", "Number of conference papers",

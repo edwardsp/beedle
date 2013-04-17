@@ -26,6 +26,21 @@ class TestDatabase(unittest.TestCase):
 		# publications with missing titles should be added
 		self.assertEqual(len(db.publications), 1)
 
+	def test_get_publication_summary_average(self):
+		db = database.Database()
+		self.assertTrue(db.read("../data/simple.xml"))
+		header, data = db.get_publication_summary_average(database.Stat.MEAN)
+		self.assertEqual(len(header), len(data[0]),
+			"header and data column size doesn't match")
+		self.assertEqual(len(data[0]), 6, 
+			"incorrect number of columns in data")
+		self.assertEqual(len(data), 2, 
+			"incorrect number of rows in data")
+		self.assertEqual(data[0][1], 2, 
+			"incorrect number of authers for conference papers")
+		self.assertEqual(data[1][1], 1, 
+			"incorrect number of publications per author")
+		
 	def test_get_publication_summary(self):
 		db = database.Database()
 		self.assertTrue(db.read("../data/simple.xml"))

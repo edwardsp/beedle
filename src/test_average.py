@@ -35,7 +35,7 @@ class TestAverage(unittest.TestCase):
 		self.assertEqual(average.mode([]), 0)
 
 	def test_mode_is_correct_for_known_values(self):
-		self.assertEqual(average.mode([1,2,2,3], 2)
+		self.assertEqual(average.mode([1,2,2,3]), 2)
 
 	def test_mode_is_zero_for_bimodal_dataset(self):
 		self.assertEqual(average.mode([1,1,2,2]), 0)
