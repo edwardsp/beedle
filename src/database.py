@@ -94,18 +94,22 @@ class Database:
 			["Number of authors"] + [ len(a) for a in alist ] + [len(ua)] ]
 		return (header, data)
 
-	# TODO: IMPLEMENT
-	def get_publications_by_author_average(self, av):
+	def get_average_authors_per_publication_by_author(self, av):
 		header = ( "Author", "Number of conference papers",
 			"Number of journals", "Number of books",
-			"Number of book chapers", "All " )
+			"Number of book chapers", "All publications" )
 
-		astats = [ [0,0,0,0] for i in range(len(self.authors)) ]
+		astats = [ [[],[],[],[]] for i in range(len(self.authors)) ]
 		for p in self.publications:
 			for a in p.authors:
-				astats[a][p.pub_type] += 1
+				astats[a][p.pub_type].append(len(p.authors))
 
-		data = [ [self.authors[i].name] + astats[i] + [sum(astats[i])] 
+		name = Stat.STR[av]
+		func = Stat.FUNC[av]
+
+		data = [ [self.authors[i].name]
+			+ [ func(L) for L in astats[i] ]
+			+ [ func(list(itertools.chain(*astats[i]))) ]
 			for i in range(len(astats)) ]
 		return (header, data)
 
@@ -125,9 +129,9 @@ class Database:
 		return (header, data)
 
 	def get_average_authors_per_publication_by_year(self, av):
-		header = ( "Year", "Number of conference papers",
-			"Number of journals", "Number of books",
-			"Number of book chapers", "All publications" )
+		header = ( "Year", "Conference papers",
+			"Journals", "Books",
+			"Book chapers", "All publications" )
 
 		ystats = {}
 		for p in self.publications:
@@ -160,6 +164,31 @@ class Database:
 				ystats[p.year][p.pub_type] += 1
 
 		data = [ [y]+ystats[y]+[sum(ystats[y])] for y in ystats ]
+		return (header, data)	
+
+	def get_average_publications_per_author_by_year(self, av):
+		header = ( "Year", "Conference papers",
+			"Journals", "Books",
+			"Book chapers", "All publications" )
+
+		pub_per_auth = np.zeros((len(self.authors), 4))
+		ystats = {}
+		for p in self.publications:
+			try:
+				s = ystats[p.year]
+			except KeyError:
+				s = np.zeros((len(self.authors), 4))
+				ystats[p.year] = s
+			for a in p.authors:
+				s[a][p.pub_type] += 1
+		
+		name = Stat.STR[av]
+		func = Stat.FUNC[av]
+
+		data = [ [y]
+			+ [ func(ystats[y][:,i]) for i in np.arange(4) ] 
+			+ [ func(ystats[y].sum(axis=1)) ] 
+			for y in ystats ]
 		return (header, data)	
 
 	def get_author_totals_by_year(self):

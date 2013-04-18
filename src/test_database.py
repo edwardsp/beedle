@@ -56,6 +56,17 @@ class TestDatabase(unittest.TestCase):
 		self.assertEqual(data[1][1], 2, 
 			"incorrect number of authors for conference papers")
 
+	def test_get_average_authors_per_publication_by_author(self):
+		db = database.Database()
+		self.assertTrue(db.read("../data/simple.xml"))
+		header, data = db.get_average_authors_per_publication_by_author(database.Stat.MEAN)
+		self.assertEqual(len(header), len(data[0]),
+			"header and data column size doesn't match")
+		self.assertEqual(len(data), 2, 
+			"incorrect average of number of conference papers")
+		self.assertEqual(data[0][-1], 2, 
+			"incorrect average of all publication")
+
 	def test_get_publications_by_author(self):
 		db = database.Database()
 		self.assertTrue(db.read("../data/simple.xml"))
@@ -67,6 +78,17 @@ class TestDatabase(unittest.TestCase):
 		self.assertEqual(data[0][-1], 1, 
 			"incorrect total")
 
+	def test_get_average_publications_per_author_by_year(self):
+		db = database.Database()
+		self.assertTrue(db.read("../data/simple.xml"))
+		header, data = db.get_average_publications_per_author_by_year(database.Stat.MEAN)
+		self.assertEqual(len(header), len(data[0]),
+			"header and data column size doesn't match")
+		self.assertEqual(len(data), 1,
+			"incorrect number of rows")
+		self.assertEqual(data[0][0], 9999,
+			"incorrect year in result")
+
 	def test_get_publications_by_year(self):
 		db = database.Database()
 		self.assertTrue(db.read("../data/simple.xml"))
@@ -77,6 +99,19 @@ class TestDatabase(unittest.TestCase):
 			"incorrect number of rows")
 		self.assertEqual(data[0][0], 9999,
 			"incorrect year in result")
+
+	def test_get_average_authors_per_publication_by_year(self):
+		db = database.Database()
+		self.assertTrue(db.read("../data/simple.xml"))
+		header, data = db.get_author_totals_by_year()
+		self.assertEqual(len(header), len(data[0]),
+			"header and data column size doesn't match")
+		self.assertEqual(len(data), 1,
+			"incorrect number of rows")
+		self.assertEqual(data[0][0], 9999,
+			"incorrect year in result")
+		self.assertEqual(data[0][1], 2,
+			"incorrect number of authors in result")
 
 	def test_get_author_totals_by_year(self):
 		db = database.Database()
