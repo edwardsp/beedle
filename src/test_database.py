@@ -26,21 +26,46 @@ class TestDatabase(unittest.TestCase):
 		# publications with missing titles should be added
 		self.assertEqual(len(db.publications), 1)
 
-	def test_get_publication_summary_average(self):
+	def test_get_average_authors_per_publication(self):
 		db = database.Database()
-		self.assertTrue(db.read("../data/simple.xml"))
-		header, data = db.get_publication_summary_average(database.Stat.MEAN)
-		self.assertEqual(len(header), len(data[0]),
-			"header and data column size doesn't match")
-		self.assertEqual(len(data[0]), 6, 
-			"incorrect number of columns in data")
-		self.assertEqual(len(data), 2, 
-			"incorrect number of rows in data")
-		self.assertEqual(data[0][1], 2, 
-			"incorrect number of authers for conference papers")
-		self.assertEqual(data[1][1], 1, 
-			"incorrect number of publications per author")
+		self.assertTrue(db.read("../data/sprint-2-acceptance-1.xml"))
+		header, data = db.get_average_authors_per_publication(database.Stat.MEAN)
+		self.assertAlmostEqual(data[0][0], 2.3, places=1)
+		header, data = db.get_average_authors_per_publication(database.Stat.MEDIAN)
+		self.assertAlmostEqual(data[0][0], 2, places=1)
+		header, data = db.get_average_authors_per_publication(database.Stat.MODE)
+		self.assertEqual(data[0][0], [2])
 		
+	def test_get_average_publications_per_author(self):
+		db = database.Database()
+		self.assertTrue(db.read("../data/sprint-2-acceptance-2.xml"))
+		header, data = db.get_average_publications_per_author(database.Stat.MEAN)
+		self.assertAlmostEqual(data[0][0], 1.5, places=1)
+		header, data = db.get_average_publications_per_author(database.Stat.MEDIAN)
+		self.assertAlmostEqual(data[0][0], 1.5, places=1)
+		header, data = db.get_average_publications_per_author(database.Stat.MODE)
+		self.assertEqual(data[0][0], [0,1,2,3])
+		
+	def test_get_average_publications_in_a_year(self):
+		db = database.Database()
+		self.assertTrue(db.read("../data/sprint-2-acceptance-3.xml"))
+		header, data = db.get_average_publications_in_a_year(database.Stat.MEAN)
+                self.assertAlmostEqual(data[0][0], 2.5, places=1)
+                header, data = db.get_average_publications_in_a_year(database.Stat.MEDIAN)
+                self.assertAlmostEqual(data[0][0], 3, places=1)
+                header, data = db.get_average_publications_in_a_year(database.Stat.MODE)
+                self.assertEqual(data[0][0], [3])
+
+	def test_get_average_authors_in_a_year(self):
+		db = database.Database()
+		self.assertTrue(db.read("../data/sprint-2-acceptance-4.xml"))
+		header, data = db.get_average_authors_in_a_year(database.Stat.MEAN)
+                self.assertAlmostEqual(data[0][0], 2.8, places=1)
+                header, data = db.get_average_authors_in_a_year(database.Stat.MEDIAN)
+                self.assertAlmostEqual(data[0][0], 3, places=1)
+                header, data = db.get_average_authors_in_a_year(database.Stat.MODE)
+                self.assertEqual(data[0][0], [0,2,4,5])
+
 	def test_get_publication_summary(self):
 		db = database.Database()
 		self.assertTrue(db.read("../data/simple.xml"))
@@ -58,14 +83,18 @@ class TestDatabase(unittest.TestCase):
 
 	def test_get_average_authors_per_publication_by_author(self):
 		db = database.Database()
-		self.assertTrue(db.read("../data/simple.xml"))
+		self.assertTrue(db.read("../data/three-authors-and-three-publications.xml"))
 		header, data = db.get_average_authors_per_publication_by_author(database.Stat.MEAN)
 		self.assertEqual(len(header), len(data[0]),
 			"header and data column size doesn't match")
-		self.assertEqual(len(data), 2, 
+		self.assertEqual(len(data), 3, 
 			"incorrect average of number of conference papers")
-		self.assertEqual(data[0][-1], 2, 
-			"incorrect average of all publication")
+		self.assertEqual(data[0][1], 1.5,
+			"incorrect mean journals for author1")
+		self.assertEqual(data[1][1], 2,
+			"incorrect mean journals for author2")
+		self.assertEqual(data[2][1], 1,
+			"incorrect mean journals for author3")
 
 	def test_get_publications_by_author(self):
 		db = database.Database()

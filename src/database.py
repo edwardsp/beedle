@@ -51,6 +51,84 @@ class Database:
 		infile.close()
 		return valid
 
+	def get_average_authors_per_publication(self, av):
+		header = ("Conference Paper", "Journal", "Book", "Book Chapter", "All Publications")
+
+		auth_per_pub = [[],[],[],[]]
+
+		for p in self.publications:
+			auth_per_pub[p.pub_type].append(len(p.authors))
+
+		name = Stat.STR[av]
+		func = Stat.FUNC[av]
+
+		data = [ [ func(auth_per_pub[i]) for i in np.arange(4) ]
+			+ [ func(list(itertools.chain(*auth_per_pub))) ] ]
+		return (header, data)
+			
+	def get_average_publications_per_author(self, av):
+		header = ("Conference Paper", "Journal", "Book", "Book Chapter", "All Publications")
+
+		pub_per_auth = np.zeros((len(self.authors), 4))
+
+		for p in self.publications:
+			for a in p.authors:
+				pub_per_auth[a, p.pub_type] += 1
+
+		name = Stat.STR[av]
+		func = Stat.FUNC[av]
+
+		data = [ [ func(pub_per_auth[:,i]) for i in np.arange(4) ] 
+			+ [ func(pub_per_auth.sum(axis=1)) ] ]
+		return (header, data)
+
+	def _get_year_range(self):
+		min_year = None
+		max_year = None
+		for p in self.publications:
+			if min_year == None or p.year < min_year:
+				min_year = p.year
+			if max_year == None or p.year > max_year:
+				max_year = p.year
+		return min_year, max_year
+
+	def get_average_publications_in_a_year(self, av):
+		header = ( "Conference Paper", 
+			"Journal", "Book", "Book Chapter", "All Publications" )
+
+		min_year, max_year = self._get_year_range()
+		ystats = np.zeros((max_year - min_year + 1, 4))
+
+		for p in self.publications:
+			ystats[p.year - min_year][p.pub_type] += 1
+
+		name = Stat.STR[av]
+		func = Stat.FUNC[av]
+
+		data = [ [ func(ystats[:,i]) for i in np.arange(4) ] 
+			+ [ func(ystats.sum(axis=1)) ] ]
+		return (header, data)
+
+	def get_average_authors_in_a_year(self, av):
+		header = ( "Conference Paper", 
+			"Journal", "Book", "Book Chapter", "All Publications" )
+
+		min_year, max_year = self._get_year_range()
+		yauth = [ [set(), set(), set(), set()] for x in range(min_year, max_year+1) ]
+		
+		for p in self.publications:
+			for a in p.authors:
+				yauth[p.year - min_year][p.pub_type].add(a)
+
+		ystats = np.array([ [ len(S) for S in y ] for y in yauth ])
+		
+		name = Stat.STR[av]
+		func = Stat.FUNC[av]
+
+		data = [ [ func(ystats[:,i]) for i in np.arange(4) ] 
+			+ [ func(ystats.sum(axis=1)) ] ]
+		return (header, data)
+
 	def get_publication_summary_average(self, av):
 		header = ( "Details", "Conference Paper", 
 			"Journal", "Book", "Book Chapter", "All Publications" )
