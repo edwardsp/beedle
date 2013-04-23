@@ -13,7 +13,6 @@ def median(X):
 		return 0
 	L = sorted(X)
 	if n % 2:
-		# odd number of elements
 		return L[n/2]
 	return mean(L[(n/2)-1:(n/2)+1])
 

@@ -41,6 +41,61 @@ def forcelayout():
 	args["links"] = data[1]
 	return render_template("force_layout.html", args=args)
 
+def format_data(data):
+	fmt = "%.2f"
+	result = []
+	for item in data:
+		if type(item) is list:
+			result.append(", ".join([ (fmt % i).rstrip('0').rstrip('.') for i in item ]))
+		else:
+			result.append((fmt % item).rstrip('0').rstrip('.'))
+	return result
+
+@app.route("/averages")
+def showAverages():
+	args = {}
+	args['title'] = "Averaged Data"
+	tables = []
+	headers = ["Average", "Conference Paper", "Journal", "Book", "Book Chapter", "All Publications"]
+	averages = [ database.Stat.MEAN, database.Stat.MEDIAN, database.Stat.MODE ]
+	print db.get_average_authors_per_publication(0)[1] 
+	tables.append( {
+		"id":1,
+		"title":"Average Authors per Publication",
+		"header":headers,
+		"rows":[
+			[ database.Stat.STR[i] ]
+			+ format_data(db.get_average_authors_per_publication(i)[1])
+			for i in averages ] } )
+	print tables
+	tables.append( {
+		"id":2,
+		"title":"Average Publications per Author",
+		"header":headers,
+		"rows":[
+			[ database.Stat.STR[i] ]
+			+ format_data(db.get_average_publications_per_author(i)[1])
+			for i in averages ] } )
+	tables.append( {
+		"id":3,
+		"title":"Average Publications in a Year",
+		"header":headers,
+		"rows":[
+			[ database.Stat.STR[i] ]
+			+ format_data(db.get_average_publications_in_a_year(i)[1])
+			for i in averages ] } )
+	tables.append( {
+		"id":4,
+		"title":"Average Authors in a Year",
+		"header":headers,
+		"rows":[
+			[ database.Stat.STR[i] ]
+			+ format_data(db.get_average_authors_in_a_year(i)[1])
+			for i in averages ] } )
+	
+	args['tables'] = tables
+	return render_template("averages.html", args=args)
+
 @app.route("/statistics")
 def showStatisticsMenu():
 	return render_template('statistics.html')

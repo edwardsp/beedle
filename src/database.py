@@ -62,8 +62,7 @@ class Database:
 		name = Stat.STR[av]
 		func = Stat.FUNC[av]
 
-		data = [ [ func(auth_per_pub[i]) for i in np.arange(4) ]
-			+ [ func(list(itertools.chain(*auth_per_pub))) ] ]
+		data = [ func(auth_per_pub[i]) for i in np.arange(4) ] + [ func(list(itertools.chain(*auth_per_pub))) ] 
 		return (header, data)
 			
 	def get_average_publications_per_author(self, av):
@@ -78,8 +77,7 @@ class Database:
 		name = Stat.STR[av]
 		func = Stat.FUNC[av]
 
-		data = [ [ func(pub_per_auth[:,i]) for i in np.arange(4) ] 
-			+ [ func(pub_per_auth.sum(axis=1)) ] ]
+		data = [ func(pub_per_auth[:,i]) for i in np.arange(4) ] + [ func(pub_per_auth.sum(axis=1)) ]
 		return (header, data)
 
 	def _get_year_range(self):
@@ -105,8 +103,7 @@ class Database:
 		name = Stat.STR[av]
 		func = Stat.FUNC[av]
 
-		data = [ [ func(ystats[:,i]) for i in np.arange(4) ] 
-			+ [ func(ystats.sum(axis=1)) ] ]
+		data = [ func(ystats[:,i]) for i in np.arange(4) ] + [ func(ystats.sum(axis=1)) ]
 		return (header, data)
 
 	def get_average_authors_in_a_year(self, av):
@@ -114,19 +111,19 @@ class Database:
 			"Journal", "Book", "Book Chapter", "All Publications" )
 
 		min_year, max_year = self._get_year_range()
-		yauth = [ [set(), set(), set(), set()] for x in range(min_year, max_year+1) ]
+		yauth = [ [set(), set(), set(), set(), set()] for x in range(min_year, max_year+1) ]
 		
 		for p in self.publications:
 			for a in p.authors:
 				yauth[p.year - min_year][p.pub_type].add(a)
+				yauth[p.year - min_year][4].add(a)
 
 		ystats = np.array([ [ len(S) for S in y ] for y in yauth ])
 		
 		name = Stat.STR[av]
 		func = Stat.FUNC[av]
 
-		data = [ [ func(ystats[:,i]) for i in np.arange(4) ] 
-			+ [ func(ystats.sum(axis=1)) ] ]
+		data = [ func(ystats[:,i]) for i in np.arange(5) ]
 		return (header, data)
 
 	def get_publication_summary_average(self, av):
