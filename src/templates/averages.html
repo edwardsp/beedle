@@ -27,6 +27,10 @@
 <script>
 {% for table in args.tables %}
 	var table{{ table.id }} = $("#table{{ table.id }}").dataTable();
+	$(".dataTables_length").each(function(index){$(this).hide();});
+	$(".dataTables_filter").each(function(index){$(this).hide();});
+	$(".dataTables_info").each(function(index){$(this).hide();});
+	$(".dataTables_paginate").each(function(index){$(this).hide();});
 {% endfor %}
 </script>
 {% endblock %}
