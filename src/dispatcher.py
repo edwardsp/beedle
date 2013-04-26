@@ -41,6 +41,16 @@ def forcelayout():
 	args["links"] = data[1]
 	return render_template("force_layout.html", args=args)
 
+@app.route("/visualisation/network")
+def forcelayout2():
+	args = {}
+	args["width"] = int(request.args.get("width"))
+	args["height"] = int(request.args.get("height"))
+	data = db.get_network_data()
+	args["nodes"] = data[0]
+	args["links"] = data[1]
+	return render_template("network.html", args=args)
+
 def format_data(data):
 	fmt = "%.2f"
 	result = []
@@ -95,6 +105,27 @@ def showAverages():
 	
 	args['tables'] = tables
 	return render_template("averages.html", args=args)
+
+@app.route("/coauthors")
+def showCoAuthors():
+	args = {}
+	args["title"] = "Co-Authors"
+	start_year = db.min_year
+	if "start_year" in request.args:
+		start_year = int(request.args.get("start_year"))
+	end_year = db.max_year
+	if "end_year" in request.args:
+		end_year = int(request.args.get("end_year"))
+	pub_type = 4
+	if "pub_type" in request.args:
+		pub_type = int(request.args.get("pub_type"))
+	args["data"] = db.get_coauthor_data(start_year, end_year, pub_type)
+	args["start_year"] = start_year
+	args["end_year"] = end_year
+	args["pub_type"] = pub_type
+	args["min_year"] = db.min_year
+	args["max_year"] = db.max_year
+	return render_template("coauthors.html", args=args)
 
 @app.route("/statistics")
 def showStatisticsMenu():

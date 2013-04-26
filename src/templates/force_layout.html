@@ -24,7 +24,8 @@ var width = {{ args.width }},
 var color = d3.scale.category20();
 
 var force = d3.layout.force()
-    .charge(-120)
+    .gravity(0.2)
+    .charge(-50)
     .linkDistance(50)
     .size([width, height]);
 
@@ -33,11 +34,12 @@ var svg = d3.select("div #forcelayout").append("svg")
     .attr("height", height);
 
 var nodes = [
-  { name:"{{ args.nodes[0][0] }}", group:{{ args.nodes[0][1] }}, fixed:true, x:width/2, y:height/2 },
-{% for n in args.nodes[1:] %}
-  { name:"{{ n[0] }}", group:{{ n[1] }} },
+{% for n in args.nodes %}
+  { name:"{{ n[0] }}", group:{{ n[1] }}, size:{{ n[2] }} },
 {% endfor %}
 ];
+// uncomment below to fix central position
+//nodes[0] = { name:"{{ args.nodes[0][0] }}", group:{{ args.nodes[0][1] }}, size:{{ args.nodes[0][2] }}, fixed:true, x:width/2, y:height/2 };
 var links = [
 {% for link in args.links %}
   { source:{{ link[0] }}, target:{{ link[1] }}, value:{{ link[2] }} },
@@ -53,14 +55,14 @@ var link = svg.selectAll(".link")
     .data(links)
   .enter().append("line")
     .attr("class", "link")
-    .style("stroke-width", function(d) { return Math.sqrt(d.value); });
+    .style("stroke-width", 0.4);//function(d) { return Math.sqrt(+d.value); });
 
 var node = svg.selectAll(".node")
     .data(nodes)
   .enter().append("circle")
     .attr("class", "node")
-    .attr("r", 5)
-    .style("fill", function(d) { return color(d.group); })
+    .attr("r", function(d) { return Math.sqrt(+d.size) })
+    .style("fill", function(d) { return color(+d.group); })
     .call(force.drag);
 
 node.append("title")

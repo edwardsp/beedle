@@ -37,6 +37,8 @@ class Database:
 		self.publications = []
 		self.authors = []
 		self.author_idx = {}
+		self.min_year = None
+		self.max_year = None
 
 		handler = DocumentHandler(self)
 		parser = make_parser()
@@ -50,6 +52,31 @@ class Database:
 			print "Error reading file ("+e.getMessage()+")"
 		infile.close()
 		return valid
+
+	def get_coauthor_data(self, start_year, end_year, pub_type):
+		coauthors = {}
+		for p in self.publications:
+			if ( ( start_year == None or p.year >= start_year ) and
+				( end_year == None or p.year <= end_year) and
+				( pub_type == 4 or pub_type == p.pub_type) ):
+				for a in p.authors:
+					for a2 in p.authors:
+						if a != a2:
+							try:
+								coauthors[a].add(a2)
+							except KeyError:
+								coauthors[a] = set([a2])
+		def display(db, coauthors, author_id):
+			return "%s (%d)" % (db.authors[author_id].name, len(coauthors[author_id]))
+
+		header = ("Author", "Co-Authors")
+		data = []
+		for a in coauthors:
+			data.append( [ display(self, coauthors, a), 
+				", ".join( [ 
+					display(self, coauthors, ca) for ca in coauthors[a] ] ) ] )
+
+		return (header, data)
 
 	def get_average_authors_per_publication(self, av):
 		header = ("Conference Paper", "Journal", "Book", "Book Chapter", "All Publications")
@@ -312,6 +339,11 @@ class Database:
 			Publication(pub_type, title, year, idlist))
 		if (len(self.publications) % 100000) == 0:
 			print "Adding publication number %d (number of authors is %d)" % (len(self.publications), len(self.authors))
+		
+		if self.min_year == None or year < self.min_year:
+			self.min_year = year
+		if self.max_year == None or year > self.max_year:
+			self.max_year = year
 
 	def _get_collaborations(self, author_id, include_self):
 		data = {}
@@ -334,7 +366,7 @@ class Database:
 
 	def get_forcelayout_data(self, name, level):
 		author_id = self.author_idx[name]
-		authors = [(author_id, 1)]
+		authors = [[author_id, 1, -1]]
 		links = {}
 		author_map = {author_id:0}
 		start = 0
@@ -342,22 +374,38 @@ class Database:
 			end = len(authors)
 			for a in range(start, end):
 				collab = self._get_collaborations(authors[a][0], False)
+				authors[a][2] = len(collab)
 				aid = a
 				for a2 in collab:
 					try:
 						a2id = author_map[a2]
 					except KeyError:
 						a2id = len(authors)
-						authors.append((a2, lvl))
+						authors.append([a2, lvl, -1])
 						author_map[a2] = a2id
 					if aid < a2id:
 						links[(aid,a2id)] = collab[a2]
 					#else:
 					#	links[(a2id,aid)] = collab[a2]
 			start = end
-		return ( [ (self.authors[a[0]].name, a[1]) for a in authors ],
+		for a in range(start, len(authors)):
+			collab = self._get_collaborations(authors[a][0], False)
+			authors[a][2] = len(collab)
+		return ( [ (self.authors[a[0]].name, a[1], a[2]) for a in authors ],
 			[ (k[0], k[1], links[k]) for k in links ] )
 
+	def get_network_data(self):
+		na = len(self.authors)
+
+		nodes = [ [self.authors[i].name,-1] for i in range(na) ]
+		links = set()
+		for a in range(na):
+			collab = self._get_collaborations(a, False)
+			nodes[a][1] = len(collab)
+			for a2 in collab:
+				if a < a2:
+					links.add((a, a2))
+		return ( nodes, links )
 
 class DocumentHandler(handler.ContentHandler):
 	TITLE_TAGS = [ "sub", "sup", "i", "tt", "ref" ]
