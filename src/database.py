@@ -51,8 +51,18 @@ class Database:
 			valid = False
 			print "Error reading file ("+e.getMessage()+")"
 		infile.close()
+
+		for p in self.publications:
+			if self.min_year == None or p.year < self.min_year:
+				self.min_year = p.year
+			if self.max_year == None or p.year > self.max_year:
+				self.max_year = p.year
+
 		return valid
 
+	def get_all_authors(self):
+		return self.author_idx.keys()
+	
 	def get_coauthor_data(self, start_year, end_year, pub_type):
 		coauthors = {}
 		for p in self.publications:
@@ -107,25 +117,14 @@ class Database:
 		data = [ func(pub_per_auth[:,i]) for i in np.arange(4) ] + [ func(pub_per_auth.sum(axis=1)) ]
 		return (header, data)
 
-	def _get_year_range(self):
-		min_year = None
-		max_year = None
-		for p in self.publications:
-			if min_year == None or p.year < min_year:
-				min_year = p.year
-			if max_year == None or p.year > max_year:
-				max_year = p.year
-		return min_year, max_year
-
 	def get_average_publications_in_a_year(self, av):
 		header = ( "Conference Paper", 
 			"Journal", "Book", "Book Chapter", "All Publications" )
 
-		min_year, max_year = self._get_year_range()
-		ystats = np.zeros((max_year - min_year + 1, 4))
+		ystats = np.zeros((int(self.max_year) - int(self.min_year) + 1, 4))
 
 		for p in self.publications:
-			ystats[p.year - min_year][p.pub_type] += 1
+			ystats[p.year - self.min_year][p.pub_type] += 1
 
 		name = Stat.STR[av]
 		func = Stat.FUNC[av]
@@ -137,13 +136,12 @@ class Database:
 		header = ( "Conference Paper", 
 			"Journal", "Book", "Book Chapter", "All Publications" )
 
-		min_year, max_year = self._get_year_range()
-		yauth = [ [set(), set(), set(), set(), set()] for x in range(min_year, max_year+1) ]
+		yauth = [ [set(), set(), set(), set(), set()] for x in range(int(self.min_year), int(self.max_year)+1) ]
 		
 		for p in self.publications:
 			for a in p.authors:
-				yauth[p.year - min_year][p.pub_type].add(a)
-				yauth[p.year - min_year][4].add(a)
+				yauth[p.year - self.min_year][p.pub_type].add(a)
+				yauth[p.year - self.min_year][4].add(a)
 
 		ystats = np.array([ [ len(S) for S in y ] for y in yauth ])
 		
@@ -452,7 +450,7 @@ class DocumentHandler(handler.ContentHandler):
 		elif self.tag == "title":
 			self.title = d
 		elif self.tag == "year":
-			self.year = d
+			self.year = int(d)
 		elif name in DocumentHandler.PUB_TYPE.keys():
 			self.db.add_publication(
 				self.pub_type,

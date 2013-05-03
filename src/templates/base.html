@@ -19,7 +19,7 @@
 <body>
   	<div data-role="page">
 		<div data-role="header">
-			<h1>Beedle Team</h1>
+			<h1>Beedle Team: {{ args.dataset }}</h1>
 			<div data-role="navbar">
 				<ul>
 			    		<li><a href="/statistics">Statistics</a></li>
@@ -30,6 +30,9 @@
 		<div data-role="content">
 			<div style="max-width:800px; margin:0 auto;">
 				{% block content %}{% endblock %}
+			</div>
+			<div style="width: 100%">
+				{% block fullwidth %}{% endblock %}
 			</div>
 		</div>
 	</div>
