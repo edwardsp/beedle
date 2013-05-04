@@ -3,7 +3,7 @@
 {% block content %}
 <h1>{{ args.title }}</h1>
 
-<form name="input" action="/coauthors" method="get" data-ajax="false">
+<form name="input" action="/coauthors" method="get" data-ajax="false" onSubmit="validateForm(this)">
 Start year: <input type="number" name="start_year" min="{{ args.min_year }}" max="{{ args.max_year }}" value="{{ args.start_year }}">
 End year: <input type="number" name="end_year" min="{{ args.min_year }}" max="{{ args.max_year }}" value="{{ args.end_year }}">
 Publication type: 
@@ -16,7 +16,7 @@ Publication type:
 </select>
 <input type="submit" value="Submit">
 </form>
-
+<button onClick="exportToCSV()">Export to CSV</button>
 <table id="table">
 	<thead>
 		<tr>
@@ -43,6 +43,23 @@ Publication type:
 	</tfoot>
 </table>
 <script>
-	var current_table = $('#table').dataTable().columnFilter();
+	var current_table = $('#table').dataTable({
+		"sDom": 'T<"clear">lfrtip',
+			"sSwfPath": "{{ url_for('static',filename='media/swf/copy_csv_xls_pdf.swf') }}"
+		}).columnFilter();
+	
+	function exportToCSV(){
+		var csv = $("#table").table2CSV({delivery:'download'});
+		window.location.href = 'data:text/csv;charset=UTF-8,'+ encodeURIComponent(csv);
+	}
+	function validateForm(form){
+		start_year = form["start_year"].value;
+		end_year = form["end_year"].value;
+		if (end_year < start_year){
+			alert("Please select a proper date");
+			return false;
+		}
+		return true;
+	}
 </script>
 {% endblock %}

@@ -16,6 +16,14 @@ def favicon():
 		os.path.join(app.root_path, "static"),
 		"favicon.ico", mimetype="image/vnd.microsoft.icon")
 
+@app.route("/media/swf/ZeroClipboard.swf")
+def getSWF():
+	return send_from_directory(os.path.join(app.root_path, "static"),"js/media/swf/ZeroClipboard.swf",mimetype="application/x-shockwave-flash")
+
+@app.route("/media/swf/copy_csv_xls_pdf.swf")
+def getSWFCopy():
+	return send_from_directory(os.path.join(app.root_path, "static"),"js/media/swf/copy_csv_xls_pdf.swf",mimetype="application/x-shockwave-flash")
+
 @app.route("/")
 def mainpage():
 	return showStatisticsMenu()
