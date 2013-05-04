@@ -4,11 +4,13 @@ from flask import send_from_directory
 from flask import request
 import mock_database
 import database
+import random
 import os
 import sys
 app = Flask(__name__)
 
 db = None
+dataset = "mock"
 
 @app.route("/favicon.ico")
 def favicon():
@@ -30,7 +32,7 @@ def mainpage():
 
 @app.route("/visualisation/wordcloud")
 def wordcloud():
-	args = {}
+	args = {"dataset":dataset}
 	args["name"] = request.args.get("name")
 	args["width"] = int(request.args.get("width"))
 	args["height"] = int(request.args.get("height"))
@@ -39,19 +41,27 @@ def wordcloud():
 
 @app.route("/visualisation/forcelayout")
 def forcelayout():
-	args = {}
-	args["name"] = request.args.get("name")
-	level = int(request.args.get("level"))
-	args["width"] = int(request.args.get("width"))
-	args["height"] = int(request.args.get("height"))
+	args = {"dataset":dataset,"name":"", "level":2, "width":800, "height":800}
+	if "name" in request.args:
+		args["name"] = request.args.get("name")
+	if "level" in request.args:
+		level = int(request.args.get("level"))
+	if "width" in request.args:
+		args["width"] = int(request.args.get("width"))
+	if "height" in request.args:
+		args["height"] = int(request.args.get("height"))
 	data = db.get_forcelayout_data(args["name"], level)
 	args["nodes"] = data[0]
 	args["links"] = data[1]
+	args["level"] = level
+	authors = db.get_all_authors()
+	authors.sort()
+	args["authors"] = authors
 	return render_template("force_layout.html", args=args)
 
 @app.route("/visualisation/network")
 def forcelayout2():
-	args = {}
+	args = {"dataset":dataset}
 	args["width"] = int(request.args.get("width"))
 	args["height"] = int(request.args.get("height"))
 	data = db.get_network_data()
@@ -71,12 +81,11 @@ def format_data(data):
 
 @app.route("/averages")
 def showAverages():
-	args = {}
+	args = {"dataset":dataset}
 	args['title'] = "Averaged Data"
 	tables = []
 	headers = ["Average", "Conference Paper", "Journal", "Book", "Book Chapter", "All Publications"]
 	averages = [ database.Stat.MEAN, database.Stat.MEDIAN, database.Stat.MODE ]
-	print db.get_average_authors_per_publication(0)[1] 
 	tables.append( {
 		"id":1,
 		"title":"Average Authors per Publication",
@@ -85,7 +94,6 @@ def showAverages():
 			[ database.Stat.STR[i] ]
 			+ format_data(db.get_average_authors_per_publication(i)[1])
 			for i in averages ] } )
-	print tables
 	tables.append( {
 		"id":2,
 		"title":"Average Publications per Author",
@@ -116,7 +124,8 @@ def showAverages():
 
 @app.route("/coauthors")
 def showCoAuthors():
-	args = {}
+	PUB_TYPES = ["Conference Papers", "Journals", "Books", "Book Chapters", "All Publications"]
+	args = {"dataset":dataset}
 	args["title"] = "Co-Authors"
 	start_year = db.min_year
 	if "start_year" in request.args:
@@ -133,15 +142,19 @@ def showCoAuthors():
 	args["pub_type"] = pub_type
 	args["min_year"] = db.min_year
 	args["max_year"] = db.max_year
+	args["start_year"] = start_year
+	args["end_year"] = end_year
+	args["pub_str"] = PUB_TYPES[pub_type]
 	return render_template("coauthors.html", args=args)
 
 @app.route("/statistics")
 def showStatisticsMenu():
-	return render_template('statistics.html')
+	args = {"dataset":dataset}
+	return render_template('statistics.html', args=args)
 
 @app.route("/statisticsdetails/<status>")
 def showPublicationSummary(status):
-	args = {}
+	args = {"dataset":dataset}
 	if (status == "publication_summary"):
 		args["title"] = "Publication Summary"
 		args["data"] = db.get_publication_summary()
@@ -161,13 +174,18 @@ def showPublicationSummary(status):
 	return render_template('statistics_details.html',args=args)
 
 if __name__ == "__main__":
+	debug = False
+	port = random.randint(10000,14000)
+	if "BEEDLE_DEV" in os.environ:
+		debug = True
+		port = 5000
 	if len(sys.argv) < 2:
 		print "Using MockDatabase"
 		db = mock_database.MockDatabase()
 	else:
-		print "Database:", sys.argv[1]
+		path, dataset = os.path.split(sys.argv[1])
+		print "Database: path=%s name=%s" % (path, dataset)
 		db = database.Database()
 		if db.read(sys.argv[1]) == False:
 			sys.exit(1)
-	app.run(debug=True)
-	app.run(debug=False)
+	app.run(debug=debug, port=port)

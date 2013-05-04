@@ -1,6 +1,22 @@
 {% extends "base.html" %}
 {% block title %}Network graph : {{ args.name }}{% endblock %}
 {% block content %}
+<h1>Network graph : {{ args.name }}</h1>
+
+<form name="input" action="/visualisation/forcelayout" method="get" data-ajax="false">
+Author:
+<select name="name">
+{% for name in args.authors %}
+	<option value="{{ name }}"{% if name == args.name %} selected="selected"{% endif %}>{{ name }}</option>
+{% endfor %}
+</select>
+Depth:
+<input type="number" name="level" min="1" max="10" value="{{ args.level }}">
+<input type="submit" value="Submit">
+</form>
+
+{% endblock %}
+{% block fullwidth %}
 <style>
 
 .node {
@@ -14,8 +30,7 @@
 }
 
 </style>
-<h1>Network graph : {{ args.name }}</h1>
-<div id="forcelayout"/>
+<div id="forcelayout" align="center"/>
 <script>
 
 var width = {{ args.width }},
