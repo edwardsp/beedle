@@ -50,16 +50,6 @@ def forcelayout():
 	args["authors"] = authors
 	return render_template("force_layout.html", args=args)
 
-@app.route("/visualisation/network")
-def forcelayout2():
-	args = {"dataset":dataset}
-	args["width"] = int(request.args.get("width"))
-	args["height"] = int(request.args.get("height"))
-	data = db.get_network_data()
-	args["nodes"] = data[0]
-	args["links"] = data[1]
-	return render_template("network.html", args=args)
-
 def format_data(data):
 	fmt = "%.2f"
 	result = []

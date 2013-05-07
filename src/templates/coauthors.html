@@ -17,7 +17,7 @@ Publication type:
 <input type="submit" value="Submit">
 </form>
 <h1>{{ args.pub_str }} in {{ args.start_year }} {% if args.start_year != args.end_year %}- {{ args.end_year }}{% endif %}</h1>
-<table id="table">
+<table id="table_colfilter">
 	<thead>
 		<tr>
 			{% for column in args.data[0] %}		
@@ -44,7 +44,7 @@ Publication type:
 </table>
 <script>
 $(document).on( 'pageshow', function() {
-	$('#table').not('.initialised').addClass('initialised').dataTable( {
+	$('#table_colfilter').not('.initialised').addClass('initialised').dataTable( {
 		"sDom": 'T<"clear">lfrtip', 
 		"oTableTools": {
 			"sSwfPath": "/static/swf/copy_cvs_xls_pdf.swf"
