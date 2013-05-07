@@ -17,7 +17,7 @@ Publication type:
 <input type="submit" value="Submit">
 </form>
 <h1>{{ args.pub_str }} in {{ args.start_year }} {% if args.start_year != args.end_year %}- {{ args.end_year }}{% endif %}</h1>
-<table id="table_{{ args.id }}">
+<table id="table">
 	<thead>
 		<tr>
 			{% for column in args.data[0] %}		
@@ -43,27 +43,22 @@ Publication type:
 	</tfoot>
 </table>
 <script>
-	var firstTime_{{ args.id }} = true;
-	$(document).on( 'pageshow', function () {
-		if (firstTime_{{ args.id }}) {
-			firstTime_{{ args.id }} = false;
-			var current_table = $('#table_{{ args.id }}').dataTable( {
-				"sDom": 'T<"clear">lfrtip', 
-				"oTableTools": {
-					"sSwfPath": "/static/swf/copy_cvs_xls_pdf.swf"
-				}
-			}).columnFilter();
+$(document).on( 'pageshow', function() {
+	$('#table').not('.initialised').addClass('initialised').dataTable( {
+		"sDom": 'T<"clear">lfrtip', 
+		"oTableTools": {
+			"sSwfPath": "/static/swf/copy_cvs_xls_pdf.swf"
 		}
-	} );
-	
-	function validateForm(form){
-		start_year = form["start_year"].value;
-		end_year = form["end_year"].value;
-		if (end_year < start_year){
-			alert("Please select a proper date");
-			return false;
-		}
-		return true;
+	}).columnFilter();
+});
+function validateForm(form){
+	start_year = form["start_year"].value;
+	end_year = form["end_year"].value;
+	if (end_year < start_year){
+		alert("Invalid date range");
+		return false;
 	}
+	return true;
+}
 </script>
 {% endblock %}

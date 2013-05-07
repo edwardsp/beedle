@@ -4,7 +4,7 @@
 <h1>{{ args.title }}</h1>
 {% for table in args.tables %}
 <h2>{{ table.title }}</h2>
-<table id="table_{{ args.id }}_{{ table.id }}">
+<table id="table_minimal_{{ table.id }}">
 	<thead>
 		<tr>
 			{% for column in table.header %}
@@ -25,19 +25,15 @@
 <br/>
 {% endfor %}
 <script>
-var firstTime_{{ args.id }} = true;
 $(document).on( 'pageshow', function () {
-	if (firstTime_{{ args.id }}) {
-		firstTime_{{ args.id }} = false;
-		{% for table in args.tables %}
-		var table{{ table.id }} = $("#table_{{ args.id }}_{{ table.id }}").dataTable( { 
-			"sDom": 'T<"clear">t',
-			"oTableTools": {
-				"sSwfPath": "/static/swf/copy_cvs_xls_pdf.swf"
-			}
-		});
-		{% endfor %}
-	}
-} );
+	{% for table in args.tables %}
+	$("#table_minimal_{{ table.id }}").not('.initialised').addClass('initialised').dataTable( { 
+		"sDom": 'T<"clear">t',
+		"oTableTools": {
+			"sSwfPath": "/static/swf/copy_cvs_xls_pdf.swf"
+		}
+	});
+	{% endfor %}
+});
 </script>
 {% endblock %}
