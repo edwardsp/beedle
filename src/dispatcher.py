@@ -18,14 +18,6 @@ def favicon():
 		os.path.join(app.root_path, "static"),
 		"favicon.ico", mimetype="image/vnd.microsoft.icon")
 
-@app.route("/media/swf/ZeroClipboard.swf")
-def getSWF():
-	return send_from_directory(os.path.join(app.root_path, "static"),"js/media/swf/ZeroClipboard.swf",mimetype="application/x-shockwave-flash")
-
-@app.route("/media/swf/copy_csv_xls_pdf.swf")
-def getSWFCopy():
-	return send_from_directory(os.path.join(app.root_path, "static"),"js/media/swf/copy_csv_xls_pdf.swf",mimetype="application/x-shockwave-flash")
-
 @app.route("/")
 def mainpage():
 	return showStatisticsMenu()
@@ -45,15 +37,14 @@ def forcelayout():
 	if "name" in request.args:
 		args["name"] = request.args.get("name")
 	if "level" in request.args:
-		level = int(request.args.get("level"))
+		args["level"] = int(request.args.get("level"))
 	if "width" in request.args:
 		args["width"] = int(request.args.get("width"))
 	if "height" in request.args:
 		args["height"] = int(request.args.get("height"))
-	data = db.get_forcelayout_data(args["name"], level)
+	data = db.get_forcelayout_data(args["name"], args["level"])
 	args["nodes"] = data[0]
 	args["links"] = data[1]
-	args["level"] = level
 	authors = db.get_all_authors()
 	authors.sort()
 	args["authors"] = authors
@@ -81,7 +72,7 @@ def format_data(data):
 
 @app.route("/averages")
 def showAverages():
-	args = {"dataset":dataset}
+	args = {"dataset":dataset,"id":"averages"}
 	args['title'] = "Averaged Data"
 	tables = []
 	headers = ["Average", "Conference Paper", "Journal", "Book", "Book Chapter", "All Publications"]
@@ -125,7 +116,7 @@ def showAverages():
 @app.route("/coauthors")
 def showCoAuthors():
 	PUB_TYPES = ["Conference Papers", "Journals", "Books", "Book Chapters", "All Publications"]
-	args = {"dataset":dataset}
+	args = {"dataset":dataset, "id":"coauthors"}
 	args["title"] = "Co-Authors"
 	start_year = db.min_year
 	if "start_year" in request.args:
@@ -154,7 +145,7 @@ def showStatisticsMenu():
 
 @app.route("/statisticsdetails/<status>")
 def showPublicationSummary(status):
-	args = {"dataset":dataset}
+	args = {"dataset":dataset, "id":status}
 	if (status == "publication_summary"):
 		args["title"] = "Publication Summary"
 		args["data"] = db.get_publication_summary()
@@ -188,4 +179,4 @@ if __name__ == "__main__":
 		db = database.Database()
 		if db.read(sys.argv[1]) == False:
 			sys.exit(1)
-	app.run(debug=debug)
+	app.run(debug=debug, port=port)

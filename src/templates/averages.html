@@ -4,7 +4,7 @@
 <h1>{{ args.title }}</h1>
 {% for table in args.tables %}
 <h2>{{ table.title }}</h2>
-<table id="table{{ table.id }}">
+<table id="table_{{ args.id }}_{{ table.id }}">
 	<thead>
 		<tr>
 			{% for column in table.header %}
@@ -25,12 +25,19 @@
 <br/>
 {% endfor %}
 <script>
-{% for table in args.tables %}
-	var table{{ table.id }} = $("#table{{ table.id }}").dataTable();
-	$(".dataTables_length").each(function(index){$(this).hide();});
-	$(".dataTables_filter").each(function(index){$(this).hide();});
-	$(".dataTables_info").each(function(index){$(this).hide();});
-	$(".dataTables_paginate").each(function(index){$(this).hide();});
-{% endfor %}
+var firstTime_{{ args.id }} = true;
+$(document).on( 'pageshow', function () {
+	if (firstTime_{{ args.id }}) {
+		firstTime_{{ args.id }} = false;
+		{% for table in args.tables %}
+		var table{{ table.id }} = $("#table_{{ args.id }}_{{ table.id }}").dataTable( { 
+			"sDom": 'T<"clear">t',
+			"oTableTools": {
+				"sSwfPath": "/static/swf/copy_cvs_xls_pdf.swf"
+			}
+		});
+		{% endfor %}
+	}
+} );
 </script>
 {% endblock %}

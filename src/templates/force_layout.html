@@ -53,8 +53,6 @@ var nodes = [
   { name:"{{ n[0] }}", group:{{ n[1] }}, size:{{ n[2] }} },
 {% endfor %}
 ];
-// uncomment below to fix central position
-//nodes[0] = { name:"{{ args.nodes[0][0] }}", group:{{ args.nodes[0][1] }}, size:{{ args.nodes[0][2] }}, fixed:true, x:width/2, y:height/2 };
 var links = [
 {% for link in args.links %}
   { source:{{ link[0] }}, target:{{ link[1] }}, value:{{ link[2] }} },
@@ -77,6 +75,7 @@ var node = svg.selectAll(".node")
   .enter().append("circle")
     .attr("class", "node")
     .attr("r", function(d) { return Math.sqrt(+d.size) })
+    //.attr("r", function(d) { return (Math.sqrt(Math.sqrt(+d.size)) *2) })
     .style("fill", function(d) { return color(+d.group); })
     .call(force.drag);
 

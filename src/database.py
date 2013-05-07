@@ -363,7 +363,10 @@ class Database:
 			for key in data ]
 
 	def get_forcelayout_data(self, name, level):
-		author_id = self.author_idx[name]
+		try:
+			author_id = self.author_idx[name]
+		except KeyError:
+			return [[], []]
 		authors = [[author_id, 1, -1]]
 		links = {}
 		author_map = {author_id:0}

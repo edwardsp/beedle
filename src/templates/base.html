@@ -9,15 +9,12 @@
 	<script type="text/javascript" src="{{url_for('static', filename='js/jquery.dataTables.min.js')}}"></script>
 	<script type="text/javascript" src="{{url_for('static', filename='js/jquery.dataTables.columnFilter.js')}}"></script>
 
+	<script type="text/javascript" src="{{url_for('static', filename='js/ZeroClipboard.js')}}"></script>
+	<script type="text/javascript" src="{{url_for('static', filename='js/TableTools.js')}}"></script>
+
 	<script type="text/javascript" src="{{url_for('static', filename='js/d3.v3.min.js')}}"></script>
 	<script type="text/javascript" src="{{url_for('static', filename='js/d3.layout.cloud.js')}}"></script>
-	
-	<script type="text/javascript" src="{{url_for('static', filename='js/d3.layout.cloud.js')}}"></script>
-	<script src="{{url_for('static', filename='js/table2CSV.js')}}"></script>
-    	
-	{% block head %}
-		<title>{% block title %}{% endblock %}</title>
-    	{% endblock %}
+	<title>{% block title %}{% endblock %}</title>
   </head>
 <body>
   	<div data-role="page">
